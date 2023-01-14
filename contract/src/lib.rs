@@ -46,6 +46,7 @@ impl Contract {
         }
     }
 
+    #[payable]
     pub fn submit_verification(&mut self, entry_id: String, trusted: bool) {
         assert_one_yocto();
 
@@ -72,6 +73,7 @@ impl Contract {
             });
     }
 
+    #[payable]
     pub fn pin_verification(&mut self, entry_id: String, trusted: bool) {
         require!(
             self.authorities.contains(&env::signer_account_id()),
@@ -106,6 +108,7 @@ impl Contract {
         }
     }
 
+    #[payable]
     pub fn add_authorities(&mut self, authorities: Vec<AccountId>) {
         require!(
             self.authorities.contains(&env::signer_account_id()),

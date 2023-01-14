@@ -35,10 +35,17 @@ test.afterEach.always(async (t) => {
 
 test("pin a entry and get the verification score", async (t) => {
   const { contract } = t.context.accounts;
-  await contract.call(contract, "pin_verification", {
-    entry_id: "test",
-    trusted: true,
-  });
+  await contract.call(
+    contract,
+    "pin_verification",
+    {
+      entry_id: "test",
+      trusted: true,
+    },
+    {
+      attachedDeposit: "1",
+    }
+  );
   const verification = await contract.view("get_verification", {
     entry_id: "test",
   });
@@ -48,14 +55,28 @@ test("pin a entry and get the verification score", async (t) => {
 
 test("vote for an entry and get cumulative trust", async (t) => {
   const { root, contract } = t.context.accounts;
-  await root.call(contract, "submit_verification", {
-    entry_id: "test",
-    trusted: true,
-  });
-  await contract.call(contract, "submit_verification", {
-    entry_id: "test",
-    trusted: false,
-  });
+  await root.call(
+    contract,
+    "submit_verification",
+    {
+      entry_id: "test",
+      trusted: true,
+    },
+    {
+      attachedDeposit: "1",
+    }
+  );
+  await contract.call(
+    contract,
+    "submit_verification",
+    {
+      entry_id: "test",
+      trusted: false,
+    },
+    {
+      attachedDeposit: "1",
+    }
+  );
   const verification = await contract.view("get_verification", {
     entry_id: "test",
   });
