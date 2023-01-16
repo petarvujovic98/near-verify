@@ -1,6 +1,6 @@
 import clsx from "clsx";
-import Image from "next/image";
 import Link from "next/link";
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { FC, useState } from "react";
 import { useWalletSelector } from "../context/WalletSelectorContext";
 
@@ -74,19 +74,19 @@ const Header: FC = () => {
               className={clsx(
                 "z-50 my-4 list-none divide-y divide-gray-100 rounded bg-white",
                 "text-base shadow dark:divide-gray-600 dark:bg-gray-700",
-                "absolute top-8",
+                "absolute top-8 right-0",
                 { hidden: !showMenu }
               )}
               id="account-dropdown"
             >
-              <ul className="py-1" aria-labelledby="user-menu-button">
+              <ul className="py-1" aria-labelledby="account-menu-button">
                 <li>
                   <button
                     type="button"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
                     onClick={() => modal.show()}
                   >
-                    Switch wallet
+                    Switch wallet/account
                   </button>
                 </li>
                 <li>
