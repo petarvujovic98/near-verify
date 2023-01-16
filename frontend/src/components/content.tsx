@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import VerificationSearch from "./verification-search";
 
 const Content: FC = () => {

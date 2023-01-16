@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormEventHandler, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -39,12 +39,13 @@ const Form: React.FC<FormProps> = ({ defautValue }) => {
 
   useEffect(() => {
     setModalVisible(!!transactionHashes);
-  }, [router.query]);
+  }, [transactionHashes]);
 
   return (
     <div className="flex h-[50vh] w-full flex-col items-center justify-center">
       <form
         className="flex min-w-[60rem] flex-col items-center justify-center"
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onSubmit={handleSubmit(async ({ source, trusted }) => {
           const wallet = await selector.wallet();
 
@@ -109,12 +110,13 @@ const Form: React.FC<FormProps> = ({ defautValue }) => {
         content={content}
         heading="Verification submission"
         secondaryText="Check out transaction"
-        secondaryAction={() => {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        secondaryAction={async () => {
           const explorerURL = new URL(
-            `/transactions/${transactionHashes}`,
+            `/transactions/${transactionHashes!}`,
             selector.options.network.explorerUrl
           );
-          router.push(explorerURL);
+          await router.push(explorerURL);
         }}
       />
     </div>

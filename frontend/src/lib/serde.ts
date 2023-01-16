@@ -17,5 +17,5 @@ export const serialize = (value: unknown): string => {
 export const deserialize = <Return>(
   value: Uint8Array | readonly number[]
 ): Return => {
-  return JSON.parse(Buffer.from(value).toString());
+  return JSON.parse(Buffer.from(value).toString()) as Return;
 };

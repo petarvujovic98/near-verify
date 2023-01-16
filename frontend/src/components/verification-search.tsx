@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FC, useCallback, useEffect, useState } from "react";
+import type { FC } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 import { getTrust } from "../lib/verify-functions";
 import { useWalletSelector } from "../context/WalletSelectorContext";
@@ -31,13 +32,15 @@ const VerificationSearch: FC = () => {
   useEffect(() => {
     if (search) {
       setLoading(true);
-      getTrust(search, selector.options.network.nodeUrl).then((trust) => {
-        setTrust(trust);
-        setLoading(false);
-        setModalVisible(true);
-      });
+      getTrust(search, selector.options.network.nodeUrl)
+        .then((trust) => {
+          setTrust(trust);
+          setLoading(false);
+          setModalVisible(true);
+        })
+        .catch(console.error);
     }
-  }, [router.query]);
+  }, [search, selector.options.network.nodeUrl]);
 
   const handleGetTrust = useCallback(
     async ({ search }: Schema) => {
@@ -46,18 +49,19 @@ const VerificationSearch: FC = () => {
       const updatedURL = new URL(window.location.href);
       updatedURL.searchParams.set("search", search);
 
-      router.replace(updatedURL);
+      await router.replace(updatedURL);
 
       const result = await getTrust(search, selector.options.network.nodeUrl);
 
       setLoading(false);
       setTrust(result);
     },
-    [selector]
+    [selector, router]
   );
 
   return (
     <div className="flex h-[50vh] items-center justify-center">
+      {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
       <form onSubmit={handleSubmit(handleGetTrust)}>
         <label
           htmlFor="search"
@@ -102,7 +106,6 @@ const VerificationSearch: FC = () => {
           </button>
         </div>
       </form>
-
       <Modal
         hidden={!modalVisible}
         disabled={loading}
@@ -119,7 +122,8 @@ const VerificationSearch: FC = () => {
           ...(trust !== null
             ? {}
             : {
-              secondaryAction: () => {
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              secondaryAction: async () => {
                 const { search } = router.query as Schema;
                 const submitURL = new URL(
                   "/submit",
@@ -127,7 +131,7 @@ const VerificationSearch: FC = () => {
                 );
                 submitURL.searchParams.set("source", search);
 
-                router.push(submitURL);
+                await router.push(submitURL);
               },
               secondaryText: "Submit a verification",
             }),

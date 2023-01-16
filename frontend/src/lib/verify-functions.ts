@@ -1,6 +1,6 @@
-import { Wallet } from "@near-wallet-selector/core";
+import type { Wallet } from "@near-wallet-selector/core";
 import { providers } from "near-api-js";
-import { CodeResult } from "near-api-js/lib/providers/provider";
+import type { CodeResult } from "near-api-js/lib/providers/provider";
 import { env } from "../env/client.mjs";
 import { deserialize, serialize } from "./serde";
 import { Gas } from "near-units";
@@ -61,6 +61,7 @@ export const submitVerification = async (
       ],
     });
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     console.error(`Failed to submit the verification with error: ${error}`);
   }
 };
