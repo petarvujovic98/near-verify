@@ -118,4 +118,8 @@ impl Contract {
 
         self.authorities.extend(authorities.into_iter());
     }
+
+    pub fn check_if_authority(&self, account_id: AccountId) -> bool {
+        self.authorities.contains(&account_id)
+    }
 }

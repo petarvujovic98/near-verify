@@ -1,12 +1,22 @@
 import clsx from "clsx";
 import Link from "next/link";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useWalletSelector } from "../context/WalletSelectorContext";
+import { checkIsAuthority } from "../lib/verify-functions";
 
 const Header: FC = () => {
   const { accountId, modal, selector } = useWalletSelector();
   const [showMenu, setShowMenu] = useState(false);
+  const [isAuthority, setIsAuthority] = useState(false);
+
+  useEffect(() => {
+    if (accountId) {
+      checkIsAuthority(accountId, selector.options.network.nodeUrl)
+        .then(setIsAuthority)
+        .catch(console.error);
+    }
+  }, [accountId, selector.options.network.nodeUrl]);
 
   return (
     <nav className="rounded border-gray-200 bg-white px-2 py-2.5 dark:bg-gray-900 sm:px-4">
@@ -29,7 +39,18 @@ const Header: FC = () => {
             Verify
           </span>
         </Link>
-        <div className="relative flex items-center md:order-2">
+        <div
+          className="relative flex items-center md:order-2"
+        // onBlur={() => setShowMenu(false)}
+        >
+          {isAuthority && (
+            <Link
+              href="/pin"
+              className="mr-6 text-sm font-medium text-gray-500 hover:underline dark:text-white"
+            >
+              Pin verification
+            </Link>
+          )}
           <Link
             href="/submit"
             className="mr-6 text-sm font-medium text-gray-500 hover:underline dark:text-white"
@@ -49,7 +70,6 @@ const Header: FC = () => {
                 "dark:hover:bg-gray-600 dark:hover:text-white",
                 "dark:focus:ring-gray-600"
               )}
-              onBlur={() => setShowMenu(false)}
               onClick={() => setShowMenu((old) => !old)}
             >
               {accountId}
@@ -93,9 +113,10 @@ const Header: FC = () => {
                 <li>
                   <button
                     type="button"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
+                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
                     // eslint-disable-next-line @typescript-eslint/no-misused-promises
                     onClick={async () => {
+                      console.log("here");
                       const wallet = await selector.wallet();
                       await wallet.signOut();
                     }}

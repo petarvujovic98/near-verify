@@ -4,12 +4,13 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useWalletSelector } from "../context/WalletSelectorContext";
-import { submitVerification } from "../lib/verify-functions";
+import { pinVerification, submitVerification } from "../lib/verify-functions";
 import Modal from "./modal";
 import { useRouter } from "next/router";
 
 type FormProps = {
   defautValue?: string;
+  pin?: boolean;
 };
 
 type QueryParams = {
@@ -23,7 +24,7 @@ const formSchema = z.object({
 
 type Schema = z.infer<typeof formSchema>;
 
-const Form: React.FC<FormProps> = ({ defautValue }) => {
+const Form: React.FC<FormProps> = ({ defautValue, pin }) => {
   const router = useRouter();
   const { transactionHashes } = router.query as QueryParams;
   const { handleSubmit, register } = useForm<Schema>({
@@ -51,7 +52,11 @@ const Form: React.FC<FormProps> = ({ defautValue }) => {
 
           try {
             setLoading(true);
-            await submitVerification(source, trusted, accountId!, wallet);
+            if (pin) {
+              await pinVerification(source, trusted, accountId!, wallet);
+            } else {
+              await submitVerification(source, trusted, accountId!, wallet);
+            }
             setLoading(false);
             setModalVisible(true);
           } catch (error) {
