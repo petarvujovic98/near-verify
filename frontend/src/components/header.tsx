@@ -49,6 +49,7 @@ const Header: FC = () => {
                 "dark:hover:bg-gray-600 dark:hover:text-white",
                 "dark:focus:ring-gray-600"
               )}
+              onBlur={() => setShowMenu(false)}
               onClick={() => setShowMenu((old) => !old)}
             >
               {accountId}
