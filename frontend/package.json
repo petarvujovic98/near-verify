@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@hookform/resolvers": "^2.9.10",
     "@near-wallet-selector/coin98-wallet": "^7.5.0",
     "@near-wallet-selector/core": "^7.5.0",
     "@near-wallet-selector/default-wallets": "^7.5.0",
@@ -27,10 +28,13 @@
     "@near-wallet-selector/sender": "^7.5.0",
     "@near-wallet-selector/wallet-connect": "^7.5.0",
     "@near-wallet-selector/welldone-wallet": "^7.5.0",
+    "clsx": "^1.2.1",
     "near-api-js": "^0.44.2",
+    "near-units": "^0.1.9",
     "next": "13.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.42.1",
     "zod": "^3.20.2"
   },
   "devDependencies": {
