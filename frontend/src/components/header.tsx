@@ -1,22 +1,17 @@
 import clsx from "clsx";
 import Link from "next/link";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { useWalletSelector } from "../context/WalletSelectorContext";
-import { checkIsAuthority } from "../lib/verify-functions";
+import { useCheckIsAuthority } from "../lib/verify-functions";
 
 const Header: FC = () => {
   const { accountId, modal, selector } = useWalletSelector();
   const [showMenu, setShowMenu] = useState(false);
-  const [isAuthority, setIsAuthority] = useState(false);
-
-  useEffect(() => {
-    if (accountId) {
-      checkIsAuthority(accountId, selector.options.network.nodeUrl)
-        .then(setIsAuthority)
-        .catch(console.error);
-    }
-  }, [accountId, selector.options.network.nodeUrl]);
+  const { data } = useCheckIsAuthority(
+    accountId || "",
+    selector.options.network.nodeUrl
+  );
 
   return (
     <nav className="rounded border-gray-200 bg-white px-2 py-2.5 dark:bg-gray-900 sm:px-4">
@@ -43,7 +38,7 @@ const Header: FC = () => {
           className="relative flex items-center md:order-2"
         // onBlur={() => setShowMenu(false)}
         >
-          {isAuthority && (
+          {data && (
             <Link
               href="/pin"
               className="mr-6 text-sm font-medium text-gray-500 hover:underline dark:text-white"

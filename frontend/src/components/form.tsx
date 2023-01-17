@@ -4,9 +4,13 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useWalletSelector } from "../context/WalletSelectorContext";
-import { pinVerification, submitVerification } from "../lib/verify-functions";
+import {
+  usePinVerification,
+  useSubmitVerification,
+} from "../lib/verify-functions";
 import Modal from "./modal";
 import { useRouter } from "next/router";
+import type { FinalExecutionOutcome } from "@near-wallet-selector/core";
 
 type FormProps = {
   defautValue?: string;
@@ -32,11 +36,13 @@ const Form: React.FC<FormProps> = ({ defautValue, pin }) => {
     resolver: zodResolver(formSchema),
   });
   const { accountId, selector } = useWalletSelector();
-  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(!!transactionHashes);
-  const [content, setContent] = useState(
-    "Successfully submitted verification score!"
-  );
+
+  const pinMutation = usePinVerification();
+  const submitMutation = useSubmitVerification();
+  const loading = pin ? pinMutation.isLoading : submitMutation.isLoading;
+  const isError = pin ? pinMutation.isError : submitMutation.isError;
+  const data = pin ? pinMutation.data : submitMutation.data;
 
   useEffect(() => {
     setModalVisible(!!transactionHashes);
@@ -50,19 +56,23 @@ const Form: React.FC<FormProps> = ({ defautValue, pin }) => {
         onSubmit={handleSubmit(async ({ source, trusted }) => {
           const wallet = await selector.wallet();
 
-          try {
-            setLoading(true);
-            if (pin) {
-              await pinVerification(source, trusted, accountId!, wallet);
-            } else {
-              await submitVerification(source, trusted, accountId!, wallet);
-            }
-            setLoading(false);
-            setModalVisible(true);
-          } catch (error) {
-            console.error(error);
-            setContent("There was an error submitting a verification score!");
+          if (pin) {
+            pinMutation.mutate({
+              entry_id: source,
+              trusted,
+              signerId: accountId!,
+              wallet,
+            });
+          } else {
+            submitMutation.mutate({
+              entry_id: source,
+              trusted,
+              signerId: accountId!,
+              wallet,
+            });
           }
+
+          setModalVisible(true);
         })}
       >
         <div className="mb-6">
@@ -112,13 +122,19 @@ const Form: React.FC<FormProps> = ({ defautValue, pin }) => {
         hidden={!modalVisible}
         disabled={loading}
         close={() => setModalVisible(false)}
-        content={content}
+        content={
+          isError
+            ? "There was an error with the transaction!"
+            : "Successfully submitted verification score!"
+        }
         heading="Verification submission"
         secondaryText="Check out transaction"
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         secondaryAction={async () => {
           const explorerURL = new URL(
-            `/transactions/${transactionHashes!}`,
+            `/transactions/${transactionHashes ||
+            (data as FinalExecutionOutcome).transaction_outcome.id
+            }`,
             selector.options.network.explorerUrl
           );
           await router.push(explorerURL);

@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FC } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
-import { getTrust } from "../lib/verify-functions";
+import { useGetTrust } from "../lib/verify-functions";
 import { useWalletSelector } from "../context/WalletSelectorContext";
 import Modal from "./modal";
 import { useRouter } from "next/router";
@@ -20,49 +20,31 @@ type Schema = z.infer<typeof validation>;
 const VerificationSearch: FC = () => {
   const router = useRouter();
   const { search } = router.query as Schema;
-  const { handleSubmit, register } = useForm<Schema>({
+  const { handleSubmit, register, watch } = useForm<Schema>({
     defaultValues: { search },
     resolver: zodResolver(validation),
   });
   const { selector } = useWalletSelector();
-  const [trust, setTrust] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
-  useEffect(() => {
-    if (search) {
-      setLoading(true);
-      getTrust(search, selector.options.network.nodeUrl)
-        .then((trust) => {
-          setTrust(trust);
-          setLoading(false);
-          setModalVisible(true);
-        })
-        .catch(console.error);
-    }
-  }, [search, selector.options.network.nodeUrl]);
-
-  const handleGetTrust = useCallback(
-    async ({ search }: Schema) => {
-      setLoading(true);
-
-      const updatedURL = new URL(window.location.href);
-      updatedURL.searchParams.set("search", search);
-
-      await router.replace(updatedURL);
-
-      const result = await getTrust(search, selector.options.network.nodeUrl);
-
-      setLoading(false);
-      setTrust(result);
-    },
-    [selector, router]
+  const { data, isLoading, refetch } = useGetTrust(
+    watch("search"),
+    selector.options.network.nodeUrl
   );
 
   return (
     <div className="flex h-[50vh] items-center justify-center">
-      {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-      <form onSubmit={handleSubmit(handleGetTrust)}>
+      <form
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        onSubmit={handleSubmit(({ search }) => {
+          const updatedURL = new URL(window.location.href);
+          updatedURL.searchParams.set("search", search);
+
+          router.replace(updatedURL).catch(console.error);
+          refetch()
+            .then(() => setModalVisible(true))
+            .catch(console.error);
+        })}
+      >
         <label
           htmlFor="search"
           className="sr-only mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -108,18 +90,18 @@ const VerificationSearch: FC = () => {
       </form>
       <Modal
         hidden={!modalVisible}
-        disabled={loading}
+        disabled={isLoading}
         close={() => setModalVisible(false)}
         heading="Trust score"
         content={
-          loading
+          isLoading
             ? "Loading..."
-            : trust !== null
-              ? `The trust score for this source is: ${trust}`
+            : data !== undefined
+              ? `The trust score for this source is: ${data}`
               : "This source has no trust score yet"
         }
         {...{
-          ...(trust !== null
+          ...(data !== undefined
             ? {}
             : {
               // eslint-disable-next-line @typescript-eslint/no-misused-promises

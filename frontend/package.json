@@ -28,6 +28,7 @@
     "@near-wallet-selector/sender": "^7.5.0",
     "@near-wallet-selector/wallet-connect": "^7.5.0",
     "@near-wallet-selector/welldone-wallet": "^7.5.0",
+    "@tanstack/react-query": "^4.22.0",
     "clsx": "^1.2.1",
     "near-api-js": "^0.44.2",
     "near-units": "^0.1.9",
